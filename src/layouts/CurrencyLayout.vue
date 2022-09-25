@@ -4,7 +4,7 @@
       <q-card>
         <div class="header_container">
           <div class="header_top">
-            Курс EUR на 2020.01.19
+            Курс EUR на {{ date }}
           </div>
           <div class="header_bar">
             <q-tabs
@@ -151,10 +151,10 @@ export default {
     this.updateCurrency()
   },
   watch: {
-    baseCurrency(newCurrency, oldCurrency) {
+    baseCurrency() {
       this.updateCurrency()
     },
-    date(newDate, oldDate) {
+    date() {
       this.updateCurrency()
     }
   }
