@@ -6,7 +6,7 @@
           {{ value }} <span class="text-grey-5">{{ baseCurrency }} =</span>
         </div>
         <div class="q-pt-md result_currency">
-          {{ symbol.value * value }} <span>{{symbol.name.toUpperCase()}}</span>
+          {{ (symbol.value * value).toFixed(2) }} <span>{{symbol.name.toUpperCase()}}</span>
         </div>
       </q-card-section>
     </q-card>

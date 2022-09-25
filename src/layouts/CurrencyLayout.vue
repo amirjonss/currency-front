@@ -8,7 +8,7 @@
           </div>
           <div class="header_bar">
             <q-tabs
-              v-model="tab"
+              v-model="baseCurrency"
               inline-label
               outside-arrows
               mobile-arrows
@@ -26,7 +26,7 @@
             </q-tabs>
           </div>
         </div>
-        <q-tab-panels v-model="tab" animated>
+        <q-tab-panels v-model="baseCurrency" animated>
           <q-tab-panel
             :name="symbol.name"
             class="row q-col-gutter-md tab_panels"
@@ -35,11 +35,11 @@
           >
 
               <div class="col-6">
-                <q-input v-model="date" mask="date" :rules="['date']" style="width: 150px" dense>
+                <q-input v-model="date" style="width: 110px" dense>
                   <template v-slot:append>
                     <q-icon name="event" class="cursor-pointer">
                       <q-popup-proxy cover transition-show="scale" transition-hide="scale">
-                        <q-date v-model="date">
+                        <q-date v-model="date" mask="YYYY-MM-DD">
                           <div class="row items-center justify-end">
                             <q-btn v-close-popup label="Close" color="primary" flat />
                           </div>
@@ -51,7 +51,7 @@
               </div>
               <div class="col-6 q-pb-lg">
                 <div class="row justify-end">
-                  <div class="col-xs-7 q-pr-sm col-sm-2">
+                  <div class="col-xs-7 q-pr-sm col-sm-7">
                     <q-input
                       v-model="value"
                       input-class="text-right"
@@ -99,39 +99,33 @@
 
 <script>
 import CurrencyCard from "components/CurrencyCard.vue";
+import { mapActions, mapState } from "pinia";
+import { useCurrencyStore } from "stores/currency-store";
 
 export default {
   name: "CurrencyLayout",
   components: { CurrencyCard },
   computed: {
+    ...mapState(useCurrencyStore, ['getCurrency']),
     page() {
       return this.symbols.slice(this.pageNext.start, this.pageNext.end)
     }
   },
   data() {
     return {
-      tab: "usd",
-      symbols: [
-        { name: "usd", value: 400 },
-        { name: "uzs", value: 100 },
-        { name: "rub", value: 150 },
-        { name: "aud", value: 129 },
-        { name: "cad", value: 500 },
-        { name: "gbp", value: 420 },
-        { name: "jpy", value: 230 },
-        { name: "hrk", value: 700 },
-        { name: "eur", value: 120 }
-      ],
+      tab: "AED",
+      symbols: [],
       pageNext: {
         start: 0,
         end: 4,
       },
       value: 1,
-      baseCurrency: 'EUR',
-      date: new Date().toISOString()
+      baseCurrency: 'AED',
+      date: new Date().toISOString().slice(0, 10)
     };
   },
   methods: {
+    ...mapActions(useCurrencyStore, ['fetchCurrency']),
     nextPage() {
       this.pageNext.start +=  4
       this.pageNext.end +=  4
@@ -141,6 +135,27 @@ export default {
         this.pageNext.start -=  4
         this.pageNext.end -=  4
       }
+    },
+    updateCurrency() {
+      this.fetchCurrency(this.baseCurrency, this.date.slice(0, 10))
+        .then(()=>{
+          let dataCurrency = []
+          for (const [key, value] of Object.entries(this.getCurrency.rates)) {
+            dataCurrency.push({name: key, value: value})
+          }
+          this.symbols = dataCurrency
+        })
+    }
+  },
+  mounted() {
+    this.updateCurrency()
+  },
+  watch: {
+    baseCurrency(newCurrency, oldCurrency) {
+      this.updateCurrency()
+    },
+    date(newDate, oldDate) {
+      this.updateCurrency()
     }
   }
 };
